@@ -3,15 +3,14 @@ const shortid = require('shortid')
 const urlModel = require('../models/urlModel');
 const redis = require("redis");
 const { promisify } = require("util");
-const { url } = require('inspector');
 
 //Connect to redis
 const redisClient = redis.createClient(
-    16368,
-  "redis-16368.c15.us-east-1-2.ec2.cloud.redislabs.com",
+    19566,
+  "redis-19566.c299.asia-northeast1-1.gce.cloud.redislabs.com",
   { no_ready_check: true }
 );
-redisClient.auth("Y52LH5DG1XbiVCkNC2G65MvOFswvQCRQ", function (err) {
+redisClient.auth("KapxrGevTznIqHFO7XKWScke4s9HqsNZ", function (err) {
   if (err) throw err;
 });
 redisClient.on("connect", async function () {
@@ -65,7 +64,7 @@ let longUrlexist= await urlModel.findOne({longUrl}).select({__v:0,_id:0})
 if(longUrlexist){
     await SET_ASYNC(`${longUrl}`,JSON.stringify(longUrlexist))
      console.log("from db")
-    return res.status(200).send({status:true,data:longUrlexist})
+    return res.status(201).send({status:true,data:longUrlexist})
 }else{
  let createUrl = await urlModel.create(obj)
 return res.status(201).send({status:true, data:createUrl})
@@ -90,9 +89,10 @@ const getUrl = async function(req, res) {
     }
     let urlInMongoDB = await urlModel.findOne({urlCode:urlCode})
     if(!urlInMongoDB){
-        return res.status(404).send({status:false,msg:"No url found "})}
+        return res.status(404).send({status:false,msg:"No url found "})
+    }
     await SET_ASYNC(`${urlCode}`,JSON.stringify(urlInMongoDB))
-     console.log("from db")
+    console.log("from db")
     return res.status(302).redirect(urlInMongoDB.longUrl)
     
  }catch(err){
